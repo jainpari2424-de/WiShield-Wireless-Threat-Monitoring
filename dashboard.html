@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>
+   WiShield — Security Command Center
+  </title>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js">
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js">
+  </script>
+  <style>
+   
+:root {
+    --bg:#070a12;
+    --bg2:#0a0f1b;
+    --panel:#0d1422;
+    --panel2:#111a2a;
+    --line:#1d2a3d;
+    --txt:#edf4ff;
+    --muted:#7f8ca2;
+    --cyan:#38d9ff;
+    --green:#45e7a4;
+    --red:#ff5c76;
+    --yellow:#ffd166;
+    --purple:#a78bfa;
+}
+* {
+    box-sizing:border-box
+}
+html,body {
+    height:100%;
+    margin:0
+}
+body {
+    overflow:hidden;
+    background:radial-gradient(circle at 75% -10%,#16415b40,transparent 28%),radial-gradient(circle at 5% 55%,#44235b20,transparent 30%),var(--bg);
+    color:var(--txt);
+    font-family:Inter,Arial,sans-serif
+}
+button {
+    font:inherit
+}
+.app {
+    height:100vh;
+    display:flex
+}
+/* SIDEBAR */
+.rail {
+    width:224px;
+    flex:0 0 224px;
+    background:linear-gradient(180deg,#080d17f5,#070b13f5);
+    border-right:1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    padding:18px 13px;
+    z-index:20
+}
+.brand {
+    display:flex;
+    align-items:center;
+    gap:11px;
+    padding:2px 7px 23px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:20px
+}
+.rail-logo {
+    width:42px;
+    height:42px;
+    border-radius:12px;
+    border:1px solid #38d9ff42;
+    background:#38d9ff08;
+    display:grid;
+    place-items:center;
+    color:var(--cyan);
+    font-size:20px;
+    box-shadow:0 0 30px #38d9ff0d
+}
+.brand-name {
+    font:700 20px "Space Grotesk";
+    letter-spacing:.2px
+}
+.brand-sub {
+    font-size:7px;
+    color:#58677e;
+    letter-spacing:1.5px;
+    margin-top:2px
+}
+.nav-label {
+    font-size:8px;
+    color:#56657b;
+    letter-spacing:1.5px;
+    font-weight:800;
+    margin:0 8px 7px
+}
+.rail-btn {
+    width:100%;
+    height:46px;
+    border:1px solid transparent;
+    background:transparent;
+    color:#7d8ba1;
+    border-radius:10px;
+    cursor:pointer;
+    margin:2px 0;
+    position:relative;
+    display:flex;
+    align-items:center;
+    text-align:left;
+    padding:0 10px;
+    gap:11px
+}
+.rail-btn:hover,.rail-btn.active {
+    color:#fff;
+    background:#38d9ff09;
+    border-color:#38d9ff1f
+}
+.rail-btn.active:before {
+    content:"";
+    position:absolute;
+    left:-14px;
+    top:10px;
+    height:26px;
+    width:3px;
+    background:var(--cyan);
+    border-radius:3px;
+    box-shadow:0 0 12px #38d9ff55
+}
+.ico {
+    width:24px;
+    text-align:center;
+    font-size:18px;
+    color:#718097
+}
+.rail-btn.active .ico {
+    color:var(--cyan)
+}
+.nav-text {
+    font-size:11px;
+    font-weight:700;
+    flex:1
+}
+.nav-meta {
+    font-size:8px;
+    color:#59687d
+}
+.sidebar-status {
+    margin-top:auto;
+    display:flex;
+    align-items:center;
+    gap:9px;
+    padding:11px 10px;
+    border:1px solid #45e7a418;
+    background:#45e7a405;
+    border-radius:10px;
+    margin-bottom:12px
+}
+.sidebar-status b {
+    display:block;
+    font-size:9px;
+    color:#aef5d2
+}
+.sidebar-status small {
+    display:block;
+    font-size:7px;
+    color:#64738a;
+    margin-top:2px
+}
+.rail-bottom {
+    color:#4f5d72;
+    font-size:8px;
+    text-align:center;
+    padding-top:10px
+}
+.subnav {
+    display:none
+}
+/* CONTENT */
+.content {
+    min-width:0;
+    flex:1;
+    padding:20px 24px 18px;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden
+}
+.top {
+    height:57px;
+    flex:0 0 57px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border-bottom:1px solid var(--line);
+    margin-bottom:11px
+}
+.eyebrow {
+    font-size:8px;
+    color:var(--cyan);
+    font-weight:800;
+    letter-spacing:1.8px
+}
+.title {
+    font:700 25px "Space Grotesk";
+    margin-top:4px
+}
+.topright {
+    display:flex;
+    gap:8px;
+    align-items:center
+}
+.status,.action {
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:8px 10px;
+    font-size:9px;
+    font-weight:800;
+    background:#0c1421;
+    color:#aab6c8
+}
+.status {
+    color:#aef5d2;
+    border-color:#45e7a425;
+    background:#45e7a407
+}
+.action {
+    cursor:pointer
+}
+.action:hover {
+    color:#fff;
+    border-color:#38d9ff35
+}
+.dot {
+    display:inline-block;
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 10px var(--green);
+    margin-right:5px
+}
+/* VIEW SYSTEM */
+.view {
+    display:none;
+    flex:1;
+    min-height:0
+}
+.view.active {
+    display:flex;
+    flex-direction:column
+}
+.kpis {
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:13px;
+    flex:0 0 104px;
+    margin-bottom:13px
+}
+.kpi {
+    background:linear-gradient(145deg,#111a29f5,#0b111df5);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:15px 17px;
+    position:relative;
+    overflow:hidden
+}
+.kpi:after {
+    content:"";
+    position:absolute;
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    right:-22px;
+    top:-25px;
+    background:#38d9ff08
+}
+.klabel {
+    font-size:8px;
+    color:#69778c;
+    font-weight:800;
+    letter-spacing:.7px
+}
+.kval {
+    font:700 29px "Space Grotesk";
+    margin-top:9px
+}
+.knote {
+    font-size:8px;
+    color:#59677d;
+    margin-top:2px
+}
+.home-grid {
+    display:grid;
+    grid-template-columns:1.55fr .8fr;
+    grid-template-rows:1.15fr .85fr;
+    gap:13px;
+    flex:1;
+    min-height:0
+}
+.home-threat {
+    grid-column:1;
+    grid-row:1
+}
+.home-alerts {
+    grid-column:2;
+    grid-row:1
+}
+.home-stream {
+    grid-column:1;
+    grid-row:2
+}
+.home-health {
+    grid-column:2;
+    grid-row:2
+}
+/* DASH GRID */
+.dashboard-grid {
+    display:grid;
+    grid-template-columns:1.25fr .85fr .85fr;
+    grid-template-rows:1.05fr .95fr;
+    gap:8px;
+    flex:1;
+    min-height:0
+}
+.panel {
+    background:linear-gradient(145deg,#101827f7,#0b111cf7);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px;
+    min-width:0;
+    min-height:0;
+    overflow:hidden;
+    box-shadow:0 12px 35px #0004
+}
+.head {
+    height:29px;
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:8px
+}
+.ptitle {
+    font:600 11px "Space Grotesk"
+}
+.pdesc {
+    font-size:7px;
+    color:#66748a;
+    margin-top:2px
+}
+.badge {
+    font-size:6.5px;
+    font-weight:900;
+    color:#7e8ba0;
+    border:1px solid var(--line);
+    padding:4px 6px;
+    border-radius:5px;
+    white-space:nowrap
+}
+.badge.live {
+    color:var(--green);
+    border-color:#45e7a425
+}
+.badge.red {
+    color:var(--red);
+    border-color:#ff5c7625
+}
+.chart {
+    height:calc(100% - 30px);
+    min-height:100px
+}
+.list {
+    height:calc(100% - 30px);
+    overflow:auto;
+    display:grid;
+    align-content:start;
+    gap:6px
+}
+.item {
+    padding:8px;
+    border:1px solid #ffffff0c;
+    background:#ffffff03;
+    border-radius:8px
+}
+.item b {
+    font-size:8px
+}
+.item small {
+    float:right;
+    color:#59677d;
+    font-size:6.5px
+}
+.item p {
+    margin:4px 0 0;
+    color:#8996aa;
+    font-size:7.5px;
+    line-height:1.45
+}
+.empty {
+    height:100%;
+    min-height:65px;
+    display:grid;
+    place-items:center;
+    text-align:center;
+    color:#647187;
+    border:1px dashed #65748a25;
+    border-radius:8px;
+    font-size:8px;
+    padding:10px
+}
+.empty b {
+    display:block;
+    color:#aab5c7;
+    font-size:8px;
+    margin-bottom:3px
+}
+.table {
+    height:calc(100% - 30px);
+    overflow:auto
+}
+table {
+    width:100%;
+    border-collapse:collapse;
+    font-size:7px
+}
+th {
+    text-align:left;
+    color:#59677d;
+    font-size:6.5px;
+    padding:6px;
+    border-bottom:1px solid var(--line)
+}
+td {
+    padding:7px 6px;
+    border-bottom:1px solid #ffffff07;
+    color:#aab5c5;
+    white-space:nowrap
+}
+td strong {
+    color:#edf3fc
+}
+.risk {
+    font-size:6px;
+    font-weight:900;
+    padding:3px 5px;
+    border-radius:4px
+}
+.low {
+    color:var(--green);
+    background:#45e7a40b
+}
+.medium {
+    color:var(--yellow);
+    background:#ffd1660b
+}
+.high {
+    color:var(--red);
+    background:#ff5c760b
+}
+.metrics {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+    height:calc(100% - 30px)
+}
+.metric {
+    border:1px solid #ffffff0b;
+    background:#ffffff03;
+    border-radius:8px;
+    padding:8px
+}
+.metric small {
+    display:block;
+    color:#65738a;
+    font-size:6.5px;
+    text-transform:uppercase
+}
+.metric b {
+    display:block;
+    font:600 14px "Space Grotesk";
+    margin-top:5px
+}
+.capture {
+    height:calc(100% - 30px);
+    overflow:auto;
+    background:#070c14;
+    border:1px solid var(--line);
+    border-radius:8px;
+    font:7px ui-monospace,monospace
+}
+.cap {
+    padding:6px;
+    border-bottom:1px solid #ffffff05
+}
+.cap i {
+    color:#55647a;
+    font-style:normal
+}
+.cap em {
+    color:var(--cyan);
+    font-style:normal;
+    margin:0 6px
+}
+.cap span {
+    color:#9ca9bb
+}
+.map {
+    height:calc(100% - 30px);
+    border-radius:8px;
+    overflow:hidden
+}
+.leaflet-container {
+    background:#0a1019
+}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip {
+    background:#101827;
+    color:#eef4ff;
+    font-size:9px
+}
+.logline {
+    display:grid;
+    grid-template-columns:55px 65px 1fr;
+    gap:5px;
+    padding:6px;
+    border-bottom:1px solid #ffffff06;
+    font-size:7px
+}
+.logtime {
+    color:#59677d
+}
+.connect {
+    color:var(--green)
+}
+.reconnect {
+    color:var(--yellow)
+}
+.disconnect {
+    color:var(--red)
+}
+.section-view {
+    height:100%;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    grid-template-rows:1fr 1fr;
+    gap:8px
+}
+.full-panel {
+    min-height:0
+}
+.wide {
+    grid-column:1/3
+}
+.section-title {
+    font:700 16px "Space Grotesk";
+    margin-bottom:4px
+}
+.section-desc {
+    font-size:8px;
+    color:#65738a;
+    margin-bottom:10px
+}
+@media(max-width:1100px) {
+    .subnav {
+        width:155px;
+        flex-basis:155px
+    }
+    .kpis {
+        grid-template-columns:repeat(3,1fr);
+        flex-basis:150px
+    }
+    .dashboard-grid {
+        grid-template-columns:1fr 1fr;
+        grid-template-rows:repeat(3,1fr)
+    }
+}
+@media(max-width:800px) {
+    .subnav {
+        display:none
+    }
+    .rail {
+        width:62px;
+        flex-basis:62px
+    }
+    .content {
+        padding:10px
+    }
+    .dashboard-grid {
+        grid-template-columns:1fr
+    }
+    .kpis {
+        grid-template-columns:repeat(2,1fr)
+    }
+}
+
+  </style>
+ </head>
+ <body>
+  <div class="app">
+   <!-- MAIN ICON RAIL -->
+   <aside class="rail">
+    <div class="brand">
+     <div class="rail-logo">
+      ◈
+     </div>
+     <div>
+      <div class="brand-name">
+       WiShield
+      </div>
+      <div class="brand-sub">
+       SECURITY COMMAND
+      </div>
+     </div>
+    </div>
+    <div class="nav-label">
+     MAIN
+    </div>
+    <button class="rail-btn active" onclick="switchView('overview',this)">
+     <span class="ico">
+      ⌂
+     </span>
+     <span class="nav-text">
+      Home
+     </span>
+     <span class="nav-meta">
+      01
+     </span>
+    </button>
+    <button class="rail-btn" onclick="switchView('devices',this)">
+     <span class="ico">
+      ◈
+     </span>
+     <span class="nav-text">
+      Devices
+     </span>
+     <span class="nav-meta" id="navDevices">
+      0
+     </span>
+    </button>
+    <button class="rail-btn" onclick="switchView('network',this)">
+     <span class="ico">
+      ⌁
+     </span>
+     <span class="nav-text">
+      Network
+     </span>
+     <span class="nav-meta">
+      —
+     </span>
+    </button>
+    <div class="nav-label">
+     SECURITY
+    </div>
+    <button class="rail-btn" onclick="switchView('attacks',this)">
+     <span class="ico">
+      ⚠
+     </span>
+     <span class="nav-text">
+      Wireless Attacks
+     </span>
+     <span class="nav-meta" id="navAttacks">
+      0
+     </span>
+    </button>
+    <button class="rail-btn" onclick="switchView('intel',this)">
+     <span class="ico">
+      ✦
+     </span>
+     <span class="nav-text">
+      Threat Intelligence
+     </span>
+     <span class="nav-meta">
+      —
+     </span>
+    </button>
+    <button class="rail-btn" onclick="switchView('response',this)">
+     <span class="ico">
+      ↯
+     </span>
+     <span class="nav-text">
+      Alerts &amp; Response
+     </span>
+     <span class="nav-meta" id="navAlerts">
+      0
+     </span>
+    </button>
+    <div class="sidebar-status">
+     <span class="dot">
+     </span>
+     <div>
+      <b>
+       System Online
+      </b>
+      <small>
+       Flask API connected
+      </small>
+     </div>
+    </div>
+    <div class="rail-bottom">
+     WiShield · v2.1
+    </div>
+   </aside>
+   <main class="content">
+    <header class="top">
+     <div>
+      <div class="eyebrow">
+       WIRELESS DEFENSE / REAL-TIME OPERATIONS
+      </div>
+      <div class="title" id="pageTitle">
+       Security Command Center
+      </div>
+     </div>
+     <div class="topright">
+      <div class="status">
+       <span class="dot">
+       </span>
+       <span id="status">
+        SYSTEM ONLINE
+       </span>
+      </div>
+      <button class="action" onclick="loadData()">
+       ↻ SYNC
+      </button>
+     </div>
+    </header>
+    <!-- OVERVIEW -->
+    <section class="view active" id="overview">
+     <div class="kpis home-kpis">
+      <div class="kpi">
+       <div class="klabel">
+        DEVICES OBSERVED
+       </div>
+       <div class="kval" id="kDevices">
+        0
+       </div>
+       <div class="knote">
+        Current database
+       </div>
+      </div>
+      <div class="kpi">
+       <div class="klabel">
+        SUSPICIOUS DEVICES
+       </div>
+       <div class="kval" id="kRogue">
+        0
+       </div>
+       <div class="knote">
+        Threat score / rogue flag
+       </div>
+      </div>
+      <div class="kpi alert-kpi">
+       <div class="klabel">
+        OPEN ALERTS
+       </div>
+       <div class="kval" id="kAlerts">
+        0
+       </div>
+       <div class="knote">
+        Requires attention
+       </div>
+      </div>
+      <div class="kpi">
+       <div class="klabel">
+        ACTIVE ATTACKS
+       </div>
+       <div class="kval" id="kAttacks">
+        0
+       </div>
+       <div class="knote">
+        Wireless telemetry
+       </div>
+      </div>
+     </div>
+     <div class="home-grid">
+      <div class="panel home-threat">
+       <div class="head">
+        <div>
+         <div class="ptitle">
+          Realtime Threat Detection
+         </div>
+         <div class="pdesc">
+          Threat score activity from the monitoring backend
+         </div>
+        </div>
+        <span class="badge live">
+         LIVE
+        </span>
+       </div>
+       <div class="chart">
+        <canvas id="threatChart">
+        </canvas>
+       </div>
+      </div>
+      <div class="panel home-alerts">
+       <div class="head">
+        <div>
+         <div class="ptitle">
+          Open Critical Alerts
+         </div>
+         <div class="pdesc">
+          Immediate attention
+         </div>
+        </div>
+        <span class="badge red" id="alertBadge">
+         0
+        </span>
+       </div>
+       <div class="list" id="alerts">
+       </div>
+      </div>
+      <div class="panel home-stream">
+       <div class="head">
+        <div>
+         <div class="ptitle">
+          Live Security Stream
+         </div>
+         <div class="pdesc">
+          Latest device activity
+         </div>
+        </div>
+        <span class="badge live">
+         STREAM
+        </span>
+       </div>
+       <div class="list" id="stream">
+       </div>
+      </div>
+      <div class="panel home-health">
+       <div class="head">
+        <div>
+         <div class="ptitle">
+          Honeypot Health
+         </div>
+         <div class="pdesc">
+          Backend status
+         </div>
+        </div>
+        <span class="badge">
+         STATUS
+        </span>
+       </div>
+       <div class="metrics" id="health">
+       </div>
+      </div>
+     </div>
+    </section>
+    <!-- DEVICES -->
+    <section class="view" id="devices">
+     <div class="section-view">
+      <div class="panel full-panel wide">
+       <div class="section-title">
+        Device Posture &amp; Rogue Detection
+       </div>
+       <div class="section-desc">
+        Every observed wireless device, its current state and latest threat assessment.
+       </div>
+       <div class="table" style="height:calc(100% - 42px)">
+        <table>
+         <thead>
+          <tr>
+           <th>
+            ID
+           </th>
+           <th>
+            IP
+           </th>
+           <th>
+            MAC
+           </th>
+           <th>
+            STATUS
+           </th>
+           <th>
+            TYPE
+           </th>
+           <th>
+            CHANNEL
+           </th>
+           <th>
+            RSSI
+           </th>
+           <th>
+            THREAT
+           </th>
+          </tr>
+         </thead>
+         <tbody id="deviceTable">
+         </tbody>
+        </table>
+       </div>
+      </div>
+      <div class="panel full-panel">
+       <div class="head">
+        <div>
+         <div class="ptitle">
+          Device Statistics
+         </div>
+         <div class="pdesc">
+          Current posture
+         </div>
+        </div>
+       </div>
+       <div class="metrics" id="deviceMetrics">
+       </div>
+      </div>
+      <div class="panel full-panel">
+       <div class="head">
+        <div>
+         <div class="ptitle">
+          Connection Behavior
+         </div>
+         <div class="pdesc">
+          Connect / reconnect / disconnect patterns
+         </div>
+        </div>
+       </div>
+       <div class="chart">
+        <canvas id="eventChart">
+        </canvas>
+       </div>
+      </div>
+     </div>
+    </section>
+    <!-- NETWORK -->
+    <section class="view" id="network">
+     <div class="section-view">
+      <div class="panel full-panel">
+       <div class="section-title">
+        Network Packet Activity
+       </div>
+       <div class="section-desc">
+        Actual packet telemetry only. No generated bandwidth values.
+       </div>
+       <div class="chart">
+        <canvas id="packetChart">
+        </canvas>
+       </div>
+      </div>
+      <div class="panel full-panel">
+       <div class="head">
+        <div>
+         <div class="ptitle">
+          Live Capture Feed
+         </div>
+         <div class="pdesc">
+          Packet metadata
+         </div>
+        </div>
+        <span class="badge">
+         CAPTURE
+        </span>
+       </div>
+       <div class="capture" id="capture">
+       </div>
+      </div>
+      <div class="panel full-panel">
+       <div class="head">
+        <div>
+         <div class="ptitle">
+          Protocol / Channel Activity
+         </div>
+         <div class="pdesc">
+          Observed network metadata
+         </div>
+        </div>
+       </div>
+       <div class="list" id="protocols">
+       </div>
+      </div>
+      <div class="panel full-panel" id="mapPanel">
+       <div class="head">
+        <div>
+         <div class="ptitle">
+          Threat Device Map
+         </div>
+         <div class="pdesc">
+          Visualization point for the controlled honeypot
+         </div>
+        </div>
+       </div>
+       <div class="map" id="map">
+       </div>
+      </div>
+     </div>
+    </section>
+    <!-- ATTACKS -->
+    <section class="view" id="attacks">
+     <div class="section-view">
+      <div class="panel full-panel">
+       <div class="section-title">
+        Wireless Attack Information
+       </div>
+       <div class="section-desc">
+        Detected wireless attack records reported by the monitoring backend.
+       </div>
+       <div class="list" id="attackFull">
+       </div>
+      </div>
+      <div class="panel full-panel">
+       <div class="head">
+        <div>
+         <div class="ptitle">
+          Attack Classification
+         </div>
+         <div class="pdesc">
+          Severity and status
+         </div>
+        </div>
+       </div>
+       <div class="chart">
+        <canvas id="attackChart">
+        </canvas>
+       </div>
+      </div>
+      <div class="panel full-panel">
+       <div class="head">
+        <div>
+         <div class="ptitle">
+          RF &amp; Spectrum
+         </div>
+         <div class="pdesc">
+          Only actual RF telemetry is shown
+         </div>
+        </div>
+       </div>
+       <div class="metrics" id="rf">
+       </div>
+      </div>
+      <div class="panel full-panel">
+       <div class="head">
+        <div>
+         <div class="ptitle">
+          Honeypot Interactions
+         </div>
+         <div class="pdesc">
+          Controlled environment activity
+         </div>
+        </div>
+       </div>
+       <div class="list" id="interactions">
+       </div>
+      </div>
+     </div>
+    </section>
+    <!-- INTEL -->
+    <section class="view" id="intel">
+     <div class="section-view">
+      <div class="panel full-panel wide">
+       <div class="section-title">
+        Threat Intelligence &amp; Classification
+       </div>
+       <div class="section-desc">
+        Evidence, confidence, indicators and recommended actions from the detection layer.
+       </div>
+       <div class="list" id="intelList">
+       </div>
+      </div>
+      <div class="panel full-panel">
+       <div class="head">
+        <div>
+         <div class="ptitle">
+          Threat Categories
+         </div>
+         <div class="pdesc">
+          Current classification records
+         </div>
+        </div>
+       </div>
+       <div class="chart">
+        <canvas id="intelChart">
+        </canvas>
+       </div>
+      </div>
+      <div class="panel full-panel">
+       <div class="head">
+        <div>
+         <div class="ptitle">
+          Evidence Console
+         </div>
+         <div class="pdesc">
+          Detection evidence
+         </div>
+        </div>
+       </div>
+       <div class="list" id="evidence">
+       </div>
+      </div>
+     </div>
+    </section>
+    <!-- RESPONSE -->
+    <section class="view" id="response">
+     <div class="section-view">
+      <div class="panel full-panel">
+       <div class="section-title">
+        Security Alerts &amp; Automated Response
+       </div>
+       <div class="section-desc">
+        Open alerts, acknowledgement state and recorded mitigation actions.
+       </div>
+       <div class="list" id="responseAlerts">
+       </div>
+      </div>
+      <div class="panel full-panel">
+       <div class="head">
+        <div>
+         <div class="ptitle">
+          Response Actions
+         </div>
+         <div class="pdesc">
+          Mitigation history
+         </div>
+        </div>
+       </div>
+       <div class="list" id="responses">
+       </div>
+      </div>
+      <div class="panel full-panel">
+       <div class="head">
+        <div>
+         <div class="ptitle">
+          Alert Severity
+         </div>
+         <div class="pdesc">
+          Current active alerts
+         </div>
+        </div>
+       </div>
+       <div class="chart">
+        <canvas id="severityChart">
+        </canvas>
+       </div>
+      </div>
+      <div class="panel full-panel">
+       <div class="head">
+        <div>
+         <div class="ptitle">
+          System Events
+         </div>
+         <div class="pdesc">
+          Backend security events
+         </div>
+        </div>
+       </div>
+       <div class="list" id="systemEvents">
+       </div>
+      </div>
+     </div>
+    </section>
+   </main>
+  </div>
+  <script>
+   
+const API="/api/dashboard";
+let charts = {};
+let map = null;
+const $ = id => document.getElementById(id);
+const esc = x => String(x ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+}[c]));
+
+function empty(a,b) {
+    return `<div class="empty"><div><b>${esc(a)}</b>${esc(b)}</div></div>`;
+}
+
+function switchView(id,button) {
+    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+    const targetView = $(id);
+    if(targetView) targetView.classList.add("active");
+    
+    document.querySelectorAll(".rail-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".sub-link").forEach(b => b.classList.remove("active"));
+    if(button) button.classList.add("active");
+    
+    const mapRail = {
+        overview:0, devices:1, network:2, attacks:3, intel:4, response:5
+    };
+    const railBtns = document.querySelectorAll(".rail-btn");
+    if(railBtns[mapRail[id] ?? 0]) {
+        railBtns[mapRail[id] ?? 0].classList.add("active");
+    }
+    
+    const titles = {
+        overview:"Security Command Center", devices:"Device Posture", network:"Network & Packet Activity", attacks:"Wireless Attack Intelligence", intel:"Threat Intelligence", response:"Alerts & Response"
+    };
+    const titleEl = $("pageTitle");
+    if(titleEl) titleEl.textContent = titles[id] || "Security Command Center";
+}
+
+document.querySelectorAll(".sub-link").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll(".sub-link").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+}));
+
+function makeChart(id,type,data,labels,color="#38d9ff",opts = {}) {
+    const canvasEl = $(id);
+    if(!canvasEl) return;
+    if(charts[id]) charts[id].destroy();
+    charts[id] = new Chart(canvasEl, {
+        type, data, options: {
+            responsive:true, maintainAspectRatio:false, plugins: {
+                legend: { display:false }
+            }, scales: {
+                x: {
+                    grid: { color:"#ffffff07" },
+                    ticks: { color:"#65738a", font: { size:8 } }
+                },
+                y: {
+                    beginAtZero:true, grid: { color:"#ffffff07" },
+                    ticks: { color:"#65738a", font: { size:8 } }
+                }
+            }, ...opts
+        }
+    });
+}
+
+function render(d) {
+    const dev = d.devices || [], logs = d.activity_logs || [], th = d.threat_analysis || [];
+    const alerts = (d.alerts || []).filter(a => String(a.status || "").toLowerCase() == "active");
+    const att = d.wireless_attacks || d.attacks || [];
+    const pk = d.network_packet_activity || [];
+    const rf = d.rf_metrics || [];
+    const intel = d.threat_intelligence || [];
+    const resp = d.response_actions || [];
+    const inter = d.honeypot_interactions || [];
+    const sys = d.system_events || [];
+    
+    const rogue = dev.filter(x => Number(x.is_rogue) == 1 || Number(x.threat_score || 0) > 50).length;
+    
+    // Safe DOM updating with null checks
+    const elKDev = $("kDevices"); if(elKDev) elKDev.textContent = dev.length;
+    const elKRog = $("kRogue"); if(elKRog) elKRog.textContent = rogue;
+    const elKAlt = $("kAlerts"); if(elKAlt) elKAlt.textContent = alerts.length;
+    const elKAtk = $("kAttacks"); if(elKAtk) elKAtk.textContent = att.filter(x => String(x.status || "").toLowerCase() != "resolved").length;
+    
+    const elKPps = $("kPps"); 
+    if(elKPps) {
+        elKPps.textContent = pk.length ? Number(pk[pk.length-1].packets_per_second || 0).toFixed(1) : "—";
+    }
+
+    const elNavDev = $("navDevices"); if(elNavDev) elNavDev.textContent = dev.length;
+    const elNavAtk = $("navAttacks"); if(elNavAtk) elNavAtk.textContent = att.length;
+    const elNavAlt = $("navAlerts"); if(elNavAlt) elNavAlt.textContent = alerts.length;
+    const elBadge = $("alertBadge"); if(elBadge) elBadge.textContent = alerts.length;
+
+    const t = th.slice().sort((a,b) => String(a.analyzed_at || "").localeCompare(String(b.analyzed_at || ""))).slice(-30);
+    makeChart("threatChart","line", {
+        labels: t.map(x => x.analyzed_at || ""), datasets: [{
+            data: t.map(x => Number(x.threat_score || 0)), borderColor:"#38d9ff", backgroundColor:"#38d9ff0d", fill:true, tension:.35, pointRadius:2
+        }]
+    });
+
+    const rc = { LOW:0, MEDIUM:0, HIGH:0 };
+    th.forEach(x => rc[String(x.risk_level || "LOW").toUpperCase()]++);
+    makeChart("riskChart","doughnut", {
+        labels:["LOW","MEDIUM","HIGH"], datasets:[{
+            data:[rc.LOW, rc.MEDIUM, rc.HIGH], backgroundColor:["#45e7a4","#ffd166","#ff5c76"], borderWidth:0
+        }]
+    }, {});
+
+    const alertsEl = $("alerts");
+    if(alertsEl) {
+        alertsEl.innerHTML = alerts.length ? alerts.slice(0,15).map(a => `<div class="item"><b>${esc(a.alert_type || "ALERT")}</b><small>${esc(a.created_at || "")}</small><p>Device ${esc(a.device_id || "—")} · ${esc(a.severity || "—")} · Score ${esc(a.threat_score || 0)}<br>${esc(a.message || "")}</p></div>`).join("") : empty("No open critical alerts","The active alert queue is clear.");
+    }
+
+    const recent = logs.slice().sort((a,b) => String(b.timestamp || "").localeCompare(String(a.timestamp || ""))).slice(0,25);
+    const streamEl = $("stream");
+    if(streamEl) {
+        streamEl.innerHTML = recent.length ? recent.map(x => `<div class="item"><b class="${String(x.event_type || "").toLowerCase()}">${esc(x.event_type || "EVENT")}</b><small>${esc(x.timestamp || "")}</small><p>${esc(x.description || "")}</p></div>`).join("") : empty("No activity","Waiting for device events.");
+    }
+
+    const healthEl = $("health");
+    if(healthEl) {
+        healthEl.innerHTML = [["API","ONLINE"],["Devices",dev.length],["Logs",logs.length],["Alerts",alerts.length]].map(x => `<div class="metric"><small>${x[0]}</small><b>${esc(x[1])}</b></div>`).join("");
+    }
+
+    const devTableEl = $("deviceTable");
+    if(devTableEl) {
+        devTableEl.innerHTML = dev.length ? dev.map(x => {
+            let q = th.find(z => Number(z.device_id) == Number(x.id)), s = Number(q?.threat_score ?? x.threat_score ?? 0), r = String(q?.risk_level || "LOW").toUpperCase(), c = r=="HIGH"?"high":r=="MEDIUM"?"medium":"low";
+            return `<tr><td>${x.id}</td><td>${esc(x.ip_address || "—")}</td><td>${esc(x.mac_address || "—")}</td><td>${esc(x.status || "—")}</td><td>${esc(x.device_type || "—")}</td><td>${esc(x.channel ?? "—")}</td><td>${esc(x.rssi ?? "—")}</td><td><span class="risk ${c}">${r} · ${s}</span></td></tr>`;
+        }).join("") : `<tr><td colspan="8">${empty("No devices","Waiting for telemetry.")}</td></tr>`;
+    }
+
+    const devMetricsEl = $("deviceMetrics");
+    if(devMetricsEl) {
+        devMetricsEl.innerHTML = [["Observed",dev.length],["Connected",dev.filter(x=>String(x.status||"").toLowerCase()=="connected").length],["Disconnected",dev.filter(x=>String(x.status||"").toLowerCase()=="disconnected").length],["Suspicious",rogue]].map(x => `<div class="metric"><small>${x[0]}</small><b>${x[1]}</b></div>`).join("");
+    }
+
+    makeChart("eventChart","bar", {
+        labels:["CONNECT","RECONNECT","DISCONNECT"], datasets:[{
+            data:[logs.filter(x=>x.event_type=="CONNECT").length, logs.filter(x=>x.event_type=="RECONNECT").length, logs.filter(x=>x.event_type=="DISCONNECT").length], backgroundColor:["#45e7a4","#ffd166","#ff5c76"], borderRadius:5
+        }]
+    });
+
+    const cap = d.live_capture_events || d.packet_captures || [];
+    const captureEl = $("capture");
+    if(captureEl) {
+        captureEl.innerHTML = cap.length ? cap.slice().reverse().slice(0,100).map(x => `<div class="cap"><i>${esc(x.timestamp || "")}</i><em>${esc(x.event_type || x.packet_type || "PACKET")}</em><span>${esc(x.source_mac || x.source_ip || "—")} → ${esc(x.destination_mac || x.destination_ip || "—")} ${x.packet_size ? `· ${esc(x.packet_size)}B` : ""}</span></div>`).join("") : empty("Capture feed idle","Awaiting packet telemetry from the honeypot.");
+    }
+
+    makeChart("packetChart","line", {
+        labels: pk.slice(-30).map(x => x.timestamp || ""), datasets:[{
+            data: pk.slice(-30).map(x => Number(x.packets_per_second || 0)), borderColor:"#a78bfa", backgroundColor:"#a78bfa0d", fill:true, tension:.3, pointRadius:1.5
+        }]
+    });
+
+    const protocols = {};
+    pk.forEach(x => {
+        let p = x.protocol || "Unknown";
+        protocols[p] = (protocols[p] || 0) + Number(x.packet_count || 0);
+    });
+    const protocolsEl = $("protocols");
+    if(protocolsEl) {
+        protocolsEl.innerHTML = Object.keys(protocols).length ? Object.entries(protocols).map(x => `<div class="item"><b>${esc(x[0])}</b><p>${x[1]} packets recorded</p></div>`).join("") : empty("No packet metadata","Protocol activity will appear when packet telemetry is connected.");
+    }
+
+    const attackFullEl = $("attackFull");
+    if(attackFullEl) {
+        attackFullEl.innerHTML = att.length ? att.slice().reverse().map(x => `<div class="item"><b>${esc(x.attack_type || "Wireless event")} · ${esc(x.severity || "UNCLASSIFIED")}</b><small>${esc(x.detected_at || "")}</small><p>Source ${esc(x.source_mac || "—")} → Target ${esc(x.target_mac || "—")} · Channel ${esc(x.channel ?? "—")}<br>Packets ${esc(x.packet_count ?? 0)} · Score ${esc(x.threat_score ?? 0)} · Status ${esc(x.status || "—")}<br>${esc(x.evidence || "")}</p></div>`).join("") : empty("No wireless attacks","Attack telemetry has not been supplied yet.");
+    }
+
+    const types = {};
+    att.forEach(x => {
+        let k = x.attack_type || "Unknown";
+        types[k] = (types[k] || 0) + 1;
+    });
+    makeChart("attackChart","bar", {
+        labels: Object.keys(types), datasets:[{
+            data: Object.values(types), backgroundColor:"#ff5c76", borderRadius:5
+        }]
+    });
+
+    const rfEl = $("rf");
+    if(rfEl) {
+        rfEl.innerHTML = rf.length ? (() => {
+            let x = rf[rf.length - 1];
+            return [["Channel", x.channel ?? "—"], ["Frequency", x.frequency_mhz ? x.frequency_mhz + " MHz" : "—"], ["RSSI", x.rssi ?? "—"], ["Noise", x.noise_level ?? "—"], ["Utilization", x.utilization != null ? x.utilization + "%" : "—"], ["Activity", x.channel_activity != null ? x.channel_activity + "%" : "—"]].map(m => `<div class="metric"><small>${m[0]}</small><b>${esc(m[1])}</b></div>`).join("");
+        })() : empty("RF telemetry unavailable","No spectrum metrics have been supplied by the honeypot.");
+    }
+
+    const interactionsEl = $("interactions");
+    if(interactionsEl) {
+        interactionsEl.innerHTML = inter.length ? inter.slice().reverse().map(x => `<div class="item"><b>${esc(x.interaction_type || "Interaction")} · ${esc(x.protocol || "")}</b><small>${esc(x.timestamp || "")}</small><p>${esc(x.source_ip || x.source_mac || "—")} → ${esc(x.target || "—")}<br>${esc(x.details || "")}</p></div>`).join("") : empty("No interactions","Awaiting honeypot interaction telemetry.");
+    }
+
+    const intelListEl = $("intelList");
+    if(intelListEl) {
+        intelListEl.innerHTML = intel.length ? intel.slice().reverse().map(x => `<div class="item"><b>${esc(x.classification || x.threat_type || "Threat")} · ${esc(x.severity || "")}</b><small>${esc(x.detected_at || "")}</small><p>${esc(x.description || "No description.")}<br>Confidence: ${esc(x.confidence ?? "—")} · Source: ${esc(x.source || "—")} · Indicator: ${esc(x.indicator || "—")}<br>Recommended: ${esc(x.recommended_action || "—")}</p></div>`).join("") : empty("No intelligence","Classification records will appear after the detection layer supplies them.");
+    }
+
+    const cats = {};
+    intel.forEach(x => {
+        let k = x.classification || x.threat_type || "Unknown";
+        cats[k] = (cats[k] || 0) + 1;
+    });
+    makeChart("intelChart","doughnut", {
+        labels: Object.keys(cats), datasets:[{
+            data: Object.values(cats), backgroundColor:["#38d9ff","#a78bfa","#ffd166","#ff5c76","#45e7a4"], borderWidth:0
+        }]
+    });
+
+    const evidenceEl = $("evidence");
+    if(evidenceEl) {
+        evidenceEl.innerHTML = intel.length ? intel.slice().reverse().slice(0,12).map(x => `<div class="item"><b>${esc(x.threat_type || x.classification || "Threat")}</b><p>${esc(x.indicator || "No indicator")}<br>${esc(x.description || "No evidence description.")}</p></div>`).join("") : empty("No evidence","Detection evidence will appear here.");
+    }
+
+    const responseAlertsEl = $("responseAlerts");
+    if(responseAlertsEl) {
+        responseAlertsEl.innerHTML = alerts.length ? alerts.map(a => `<div class="item"><b>${esc(a.alert_type)} · ${esc(a.severity)}</b><small>${esc(a.status)}</small><p>Device ${esc(a.device_id)} · Score ${esc(a.threat_score)}<br>${esc(a.message)}<br>Response: ${esc(a.response_status || "Pending")}</p></div>`).join("") : empty("No active alerts","No unresolved alerts are currently recorded.");
+    }
+
+    const responsesEl = $("responses");
+    if(responsesEl) {
+        responsesEl.innerHTML = resp.length ? resp.slice().reverse().map(x => `<div class="item"><b>${esc(x.action_type || "Response")} · ${esc(x.action_status || "")}</b><small>${esc(x.initiated_at || "")}</small><p>${esc(x.action_description || "")}<br>Device ${esc(x.device_id ?? "—")} · Result: ${esc(x.result || "—")}</p></div>`).join("") : empty("No response actions","Automated mitigation records will appear here when available.");
+    }
+
+    const sev = { HIGH:0, MEDIUM:0, LOW:0 };
+    alerts.forEach(x => sev[String(x.severity || "HIGH").toUpperCase()]++);
+    makeChart("severityChart","doughnut", {
+        labels:["HIGH","MEDIUM","LOW"], datasets:[{
+            data:[sev.HIGH, sev.MEDIUM, sev.LOW], backgroundColor:["#ff5c76","#ffd166","#45e7a4"], borderWidth:0
+        }]
+    });
+
+    const systemEventsEl = $("systemEvents");
+    if(systemEventsEl) {
+        systemEventsEl.innerHTML = sys.length ? sys.slice().reverse().map(x => `<div class="item"><b>${esc(x.event_type || "SYSTEM")}</b><small>${esc(x.timestamp || "")}</small><p>${esc(x.message || "")} · ${esc(x.severity || "")}</p></div>`).join("") : empty("No system events","No system event telemetry is available.");
+    }
+
+    if(!map) {
+        map = L.map("map").setView([23.0225,72.5714], 12);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19, attribution: "© OpenStreetMap"
+        }).addTo(map);
+    } else {
+        map.invalidateSize();
+    }
+    
+    map.eachLayer(l => {
+        if(l instanceof L.CircleMarker) map.removeLayer(l);
+    });
+
+    alerts.forEach(a => {
+        let x = dev.find(z => Number(z.id) == Number(a.device_id));
+        L.circleMarker([23.0225, 72.5714], {
+            radius: 8, color: "#ff5c76", fillColor: "#ff5c76", fillOpacity: .8
+        }).addTo(map).bindPopup(`<b>Threat Device ${esc(a.device_id)}</b><br>${esc(a.alert_type)} · ${esc(a.severity)}<br>Score ${esc(a.threat_score)}<br>IP ${esc(x?.ip_address || "—")}<br><small>Visualization point only; not attacker geolocation.</small>`);
+    });
+}
+
+async function loadData() {
+    try {
+        const statusEl = $("status");
+        if(statusEl) statusEl.textContent = "SYNCING";
+        
+        let r = await fetch(API, { cache: "no-store" });
+        if(!r.ok) throw Error(r.status);
+        
+        const data = await r.json();
+        render(data);
+        
+        if(statusEl) statusEl.textContent = "SYSTEM ONLINE";
+    } catch(e) {
+        console.error(e);
+        const statusEl = $("status");
+        if(statusEl) statusEl.textContent = "API OFFLINE";
+    }
+}
+
+loadData();
+setInterval(loadData, 5000);
+  </script>
+ </body>
+</html>
